@@ -4,7 +4,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "cz.martykan.forecastie"
-        minSdkVersion 15
+        minSdkVersion 16
         //noinspection ExpiringTargetSdkVersion
         targetSdkVersion 26
         versionCode 24
