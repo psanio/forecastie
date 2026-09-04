@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Forecastie</string>
+    <string name="app_name">NewOldForecastie</string>
     <string name="action_about">Σχετικά</string>
     <string name="action_graphs">Γράφημα</string>
     <string name="action_refresh">Ανανέωση</string>

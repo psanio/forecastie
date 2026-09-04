@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Forecastie</string>
+    <string name="app_name">NewOldForecastie</string>
 
     <string name="action_search">Pencarian</string>
     <string name="action_refresh">Segarkan</string>

@@ -28,4 +28,7 @@ We selected this version since:
 - The unavailable `com.roughike:bottom-bar:1.4.0.1` dependency was removed. `MapActivity` now uses the existing Android Support Design `BottomNavigationView` for the same rain, wind, and temperature layer actions.
 - Added AGP 8/Android 12 compatibility: enabled generated `BuildConfig`, declared the app `colorAccent` attribute, removed the manifest `package` attribute, and specified component `android:exported` values.
 - `./gradlew assembleDebug` passed on 2026-09-04. The APK is generated at `app/build/outputs/apk/debug/app-debug.apk`; only Java 8 source/target deprecation warnings remain under Java 21.
+- On an old Android phone, OpenWeather requests reached the host but failed with an OpenSSL `sslv3 alert handshake failure`; separate runs also showed intermittent `UnknownHostException` DNS failures.
+- `GenericRequestTask` now enables TLS 1.2 on HTTPS sockets while retaining normal certificate validation, trims the saved API key, and logs safe network exception details. DNS/routing failures still require fixing the phone or network configuration.
+
 

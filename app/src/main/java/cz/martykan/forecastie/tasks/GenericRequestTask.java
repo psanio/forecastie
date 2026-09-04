@@ -16,11 +16,29 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.Socket;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Locale;
+import java.util.ArrayList;
+import java.util.List;
+
+import java.security.KeyStore;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
 
 import cz.martykan.forecastie.Constants;
 import cz.martykan.forecastie.R;
@@ -74,6 +92,9 @@ public abstract class GenericRequestTask extends AsyncTask<String, String, TaskO
                 URL url = provideURL(coords);
                 Log.i("URL", url.getProtocol() + "://" + url.getHost() + url.getPath());
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                if (urlConnection instanceof HttpsURLConnection) {
+                    ((HttpsURLConnection) urlConnection).setSSLSocketFactory(createTls12SocketFactory());
+                }
                 urlConnection.setConnectTimeout(15000);
                 urlConnection.setReadTimeout(15000);
                 if (urlConnection.getResponseCode() == 200) {
@@ -186,6 +207,131 @@ public abstract class GenericRequestTask extends AsyncTask<String, String, TaskO
         urlBuilder.append("&appid=").append(apiKey);
 
         return new URL(urlBuilder.toString());
+    }
+
+    private SSLSocketFactory createTls12SocketFactory() throws IOException {
+        try {
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            InputStream certificateStream = context.getResources().openRawResource(R.raw.sectigo_root_r46);
+            Certificate certificate;
+            try {
+                certificate = certificateFactory.generateCertificate(certificateStream);
+            } finally {
+                close(certificateStream);
+            }
+
+            KeyStore bundledStore = KeyStore.getInstance(KeyStore.getDefaultType());
+            bundledStore.load(null, null);
+            bundledStore.setCertificateEntry("sectigo-r46", certificate);
+
+            TrustManagerFactory systemTrustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            systemTrustManagerFactory.init((KeyStore) null);
+            TrustManagerFactory bundledTrustManagerFactory = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
+            bundledTrustManagerFactory.init(bundledStore);
+
+            X509TrustManager systemTrustManager = findTrustManager(systemTrustManagerFactory.getTrustManagers());
+            X509TrustManager bundledTrustManager = findTrustManager(bundledTrustManagerFactory.getTrustManagers());
+            SSLContext context = SSLContext.getInstance("TLS");
+            context.init(null, new TrustManager[]{new CombinedTrustManager(systemTrustManager, bundledTrustManager)}, null);
+            return new Tls12SocketFactory(context.getSocketFactory());
+        } catch (Exception e) {
+            throw new IOException("Unable to enable TLS 1.2", e);
+        }
+    }
+
+    private static X509TrustManager findTrustManager(TrustManager[] trustManagers) throws IOException {
+        for (TrustManager trustManager : trustManagers) {
+            if (trustManager instanceof X509TrustManager) {
+                return (X509TrustManager) trustManager;
+            }
+        }
+        throw new IOException("No X.509 trust manager available");
+    }
+
+    private static class CombinedTrustManager implements X509TrustManager {
+        private final X509TrustManager systemTrustManager;
+        private final X509TrustManager bundledTrustManager;
+
+        CombinedTrustManager(X509TrustManager systemTrustManager, X509TrustManager bundledTrustManager) {
+            this.systemTrustManager = systemTrustManager;
+            this.bundledTrustManager = bundledTrustManager;
+        }
+
+        @Override
+        public void checkClientTrusted(X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
+            systemTrustManager.checkClientTrusted(chain, authType);
+        }
+
+        @Override
+        public void checkServerTrusted(X509Certificate[] chain, String authType) throws java.security.cert.CertificateException {
+            try {
+                systemTrustManager.checkServerTrusted(chain, authType);
+            } catch (java.security.cert.CertificateException ignored) {
+                bundledTrustManager.checkServerTrusted(chain, authType);
+            }
+        }
+
+        @Override
+        public X509Certificate[] getAcceptedIssuers() {
+            List<X509Certificate> issuers = new ArrayList<X509Certificate>();
+            for (X509Certificate issuer : systemTrustManager.getAcceptedIssuers()) {
+                issuers.add(issuer);
+            }
+            for (X509Certificate issuer : bundledTrustManager.getAcceptedIssuers()) {
+                issuers.add(issuer);
+            }
+            return issuers.toArray(new X509Certificate[issuers.size()]);
+        }
+    }
+
+    private static class Tls12SocketFactory extends SSLSocketFactory {
+        private final SSLSocketFactory delegate;
+
+        Tls12SocketFactory(SSLSocketFactory delegate) {
+            this.delegate = delegate;
+        }
+
+        private Socket configure(Socket socket) {
+            if (socket instanceof SSLSocket) {
+                ((SSLSocket) socket).setEnabledProtocols(new String[]{"TLSv1.2"});
+            }
+            return socket;
+        }
+
+        @Override
+        public String[] getDefaultCipherSuites() {
+            return delegate.getDefaultCipherSuites();
+        }
+
+        @Override
+        public String[] getSupportedCipherSuites() {
+            return delegate.getSupportedCipherSuites();
+        }
+
+        @Override
+        public Socket createSocket(Socket socket, String host, int port, boolean autoClose) throws IOException {
+            return configure(delegate.createSocket(socket, host, port, autoClose));
+        }
+
+        @Override
+        public Socket createSocket(String host, int port) throws IOException {
+            return configure(delegate.createSocket(host, port));
+        }
+
+        @Override
+        public Socket createSocket(String host, int port, InetAddress localHost, int localPort) throws IOException {
+            return configure(delegate.createSocket(host, port, localHost, localPort));
+        }
+
+        @Override
+        public Socket createSocket(InetAddress host, int port) throws IOException {
+            return configure(delegate.createSocket(host, port));
+        }
+
+        @Override
+        public Socket createSocket(InetAddress address, int port, InetAddress localAddress, int localPort) throws IOException {
+            return configure(delegate.createSocket(address, port, localAddress, localPort));
+        }
     }
 
     private void restorePreviousCity() {
