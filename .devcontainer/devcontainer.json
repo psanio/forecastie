@@ -16,7 +16,7 @@
       "settings": { "java.jdt.ls.java.home": "/usr/local/openjdk-21" }
       }
     },
-  "postCreateCommand": "java -version && gradle --version && sdkmanager --list",
+  "postCreateCommand": "java -version && ./gradlew --version && sdkmanager --list",
   "remoteUser": "vscode",
   "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gradle,target=/home/vscode/.gradle,type=bind,consistency=cached"
