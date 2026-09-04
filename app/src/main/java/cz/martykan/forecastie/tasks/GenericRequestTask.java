@@ -72,8 +72,10 @@ public abstract class GenericRequestTask extends AsyncTask<String, String, TaskO
         if (response.isEmpty()) {
             try {
                 URL url = provideURL(coords);
-                Log.i("URL", url.toString());
+                Log.i("URL", url.getProtocol() + "://" + url.getHost() + url.getPath());
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setConnectTimeout(15000);
+                urlConnection.setReadTimeout(15000);
                 if (urlConnection.getResponseCode() == 200) {
                     InputStreamReader inputStreamReader = new InputStreamReader(urlConnection.getInputStream());
                     BufferedReader r = new BufferedReader(inputStreamReader);
@@ -102,8 +104,7 @@ public abstract class GenericRequestTask extends AsyncTask<String, String, TaskO
                     output.taskResult = TaskResult.BAD_RESPONSE;
                 }
             } catch (IOException e) {
-                Log.e("IOException Data", response);
-                e.printStackTrace();
+                Log.e("Network", e.getClass().getSimpleName() + ": " + e.getMessage());
                 // Exception while reading data from url connection
                 output.taskResult = TaskResult.IO_EXCEPTION;
             }
@@ -170,7 +171,7 @@ public abstract class GenericRequestTask extends AsyncTask<String, String, TaskO
 
     private URL provideURL(String[] coords) throws UnsupportedEncodingException, MalformedURLException {
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
-        String apiKey = sp.getString("apiKey", activity.getResources().getString(R.string.apiKey));
+        String apiKey = sp.getString("apiKey", activity.getResources().getString(R.string.apiKey)).trim();
 
         StringBuilder urlBuilder = new StringBuilder("https://api.openweathermap.org/data/2.5/");
         urlBuilder.append(getAPIName()).append("?");
