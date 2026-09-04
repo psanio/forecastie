@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="cz.martykan.forecastie">
+    >
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -16,6 +16,7 @@
         android:supportsRtl="true">
         <activity
             android:name=".activities.SplashActivity"
+            android:exported="true"
             android:theme="@style/SplashTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,7 +32,9 @@
             android:name=".activities.SettingsActivity"
             android:theme="@style/AppTheme" />
 
-        <receiver android:name=".widgets.ExtensiveWidgetProvider">
+        <receiver
+            android:name=".widgets.ExtensiveWidgetProvider"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -40,7 +43,9 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/extensive_widget" />
         </receiver>
-        <receiver android:name=".widgets.TimeWidgetProvider">
+        <receiver
+            android:name=".widgets.TimeWidgetProvider"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -49,7 +54,9 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/time_widget" />
         </receiver>
-        <receiver android:name=".widgets.SimpleWidgetProvider">
+        <receiver
+            android:name=".widgets.SimpleWidgetProvider"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
             </intent-filter>
@@ -61,6 +68,7 @@
 
         <service
             android:name=".widgets.DashClockWeatherExtension"
+            android:exported="true"
             android:icon="@drawable/ic_cloud_white_24dp"
             android:label="@string/app_name"
             android:permission="com.google.android.apps.dashclock.permission.READ_EXTENSION_DATA">
@@ -79,7 +87,9 @@
                 android:value=".ExampleSettingsActivity" />
         </service>
 
-        <receiver android:name=".AlarmReceiver">
+        <receiver
+            android:name=".AlarmReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />

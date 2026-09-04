@@ -3,18 +3,14 @@ package cz.martykan.forecastie.activities;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.IdRes;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v7.app.AppCompatActivity;
+import android.view.MenuItem;
 import android.webkit.WebView;
-
-import com.roughike.bottombar.BottomBar;
-import com.roughike.bottombar.OnMenuTabClickListener;
 
 import cz.martykan.forecastie.R;
 
 public class MapActivity extends AppCompatActivity {
-
-    private BottomBar mBottomBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,29 +25,19 @@ public class MapActivity extends AppCompatActivity {
         webView.getSettings().setJavaScriptEnabled(true);
         webView.loadUrl("file:///android_asset/map.html?lat=" + prefs.getFloat("latitude", 0) + "&lon=" + prefs.getFloat("longitude", 0) + "&appid=" + apiKey);
 
-        mBottomBar = BottomBar.attach(this, savedInstanceState);
-        mBottomBar.setItems(R.menu.menu_map_bottom);
-        mBottomBar.setOnMenuTabClickListener(new OnMenuTabClickListener() {
+        BottomNavigationView navigationView = (BottomNavigationView) findViewById(R.id.map_navigation);
+        navigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
-            public void onMenuTabSelected(@IdRes int menuItemId) {
-                if (menuItemId == R.id.map_rain) {
+            public boolean onNavigationItemSelected(MenuItem item) {
+                if (item.getItemId() == R.id.map_rain) {
                     webView.loadUrl("javascript:map.removeLayer(windLayer);map.removeLayer(tempLayer);map.addLayer(rainLayer);");
-                } else if (menuItemId == R.id.map_wind) {
+                } else if (item.getItemId() == R.id.map_wind) {
                     webView.loadUrl("javascript:map.removeLayer(rainLayer);map.removeLayer(tempLayer);map.addLayer(windLayer);");
-                } else if (menuItemId == R.id.map_temperature) {
+                } else if (item.getItemId() == R.id.map_temperature) {
                     webView.loadUrl("javascript:map.removeLayer(windLayer);map.removeLayer(rainLayer);map.addLayer(tempLayer);");
                 }
-            }
-
-            @Override
-            public void onMenuTabReSelected(@IdRes int menuItemId) {
+                return true;
             }
         });
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mBottomBar.onSaveInstanceState(outState);
     }
 }

@@ -21,11 +21,11 @@ We selected this version since:
 -- Git & GitHub CLI pre-installed
 -- VS Code extensions for Java/Gradle development
 
-- First build ( ./gradlew build ) gave error. The issue is that jcenter() was deprecated and removed from newer Gradle versions. We replaced it with mavenCentral() which is the modern standard.
-
-- Retried `./gradlew build --stacktrace` on 2026-09-04. Gradle 4.10.2 downloaded successfully, but configuration stopped before dependency resolution because no Android SDK was available (`SDK location not found`).
-
-- The checked-in project still had `jcenter()` and `minSdkVersion 15`, so both were corrected: repositories now use `mavenCentral()` and the minimum SDK is API 16 (Android 4.1).
-
-- Next step: provide an Android SDK (including platforms;android-26 and build-tools;28.0.3) to the build environment and rerun `./gradlew build`.
+- The checked-in project uses `mavenCentral()` and `minSdkVersion 16` (Android 4.1).
+- The dev container installs Android SDK platform 35, build-tools 35.0.0, and platform-tools under `/opt/android-sdk`.
+- The container provides Java 21 and the repository Gradle wrapper uses Gradle 8.9. Use `./gradlew`, not a system `gradle` command.
+- The post-create check in `.devcontainer/devcontainer.json` runs `java -version && ./gradlew --version && sdkmanager --list`.
+- The unavailable `com.roughike:bottom-bar:1.4.0.1` dependency was removed. `MapActivity` now uses the existing Android Support Design `BottomNavigationView` for the same rain, wind, and temperature layer actions.
+- Added AGP 8/Android 12 compatibility: enabled generated `BuildConfig`, declared the app `colorAccent` attribute, removed the manifest `package` attribute, and specified component `android:exported` values.
+- `./gradlew assembleDebug` passed on 2026-09-04. The APK is generated at `app/build/outputs/apk/debug/app-debug.apk`; only Java 8 source/target deprecation warnings remain under Java 21.
 
