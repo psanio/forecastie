@@ -1,14 +1,11 @@
 {
   "name": "Forecastie Android Backport Development",
-  "image": "mcr.microsoft.com/devcontainers/java:dev-21-jdk-bookworm",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {},
-    "ghcr.io/devcontainers/features/android-sdk:1": {
-      "platforms": "latest",
-      "buildTools": "latest",
-      "installAndroidTools": true
-    }
+    "ghcr.io/devcontainers/features/github-cli:1": {}
     },
   "customizations": {
     "vscode": {
