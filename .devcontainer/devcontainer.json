@@ -1,5 +1,5 @@
 {"name": "Forecastie Android Backport Development",
- "image": "mcr.microsoft.com/devcontainers/java:21-android",
+ "image": "mcr.microsoft.com/devcontainers/java:dev-21-jdk-bookworm",
  "features": {
    "ghcr.io/devcontainers/features/git:1": {},
    "ghcr.io/devcontainers/features/github-cli:1": {}
