@@ -3,7 +3,12 @@
   "image": "mcr.microsoft.com/devcontainers/java:dev-21-jdk-bookworm",
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
-    "ghcr.io/devcontainers/features/github-cli:1": {}
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/android-sdk:1": {
+      "platforms": "latest",
+      "buildTools": "latest",
+      "installAndroidTools": true
+    }
     },
   "customizations": {
     "vscode": {
@@ -11,10 +16,10 @@
         "vscjava.vscode-gradle",
         "vscjava.vscode-java-pack"
         ],
-      "settings": { "java.home": "/usr/local/openjdk-21" }
+      "settings": { "java.jdt.ls.java.home": "/usr/local/openjdk-21" }
       }
     },
-  "postCreateCommand": "java -version && gradle --version && android list targets",
+  "postCreateCommand": "java -version && gradle --version && sdkmanager --list",
   "remoteUser": "vscode",
   "mounts": [
     "source=${localEnv:HOME}${localEnv:USERPROFILE}/.gradle,target=/home/vscode/.gradle,type=bind,consistency=cached"

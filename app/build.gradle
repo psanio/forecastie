@@ -1,12 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
+    namespace "cz.martykan.forecastie"
+    compileSdkVersion 35
     defaultConfig {
         applicationId "cz.martykan.forecastie"
         minSdkVersion 16
         //noinspection ExpiringTargetSdkVersion
-        targetSdkVersion 26
+        targetSdkVersion 35
         versionCode 24
         versionName "1.7"
     }
